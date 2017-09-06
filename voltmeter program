@@ -1,0 +1,33 @@
+#include<pic.h>
+void main()
+{
+        TRISC=0;
+        TRISA2=1;
+        ANS2=1;
+        ADON=1; //ADC mode on
+        CHS3=0;//r\RA2 control bit
+        CHS2=0;//
+        CHS1=1;//
+        CHS0=0;//
+        VCFG=0;//reference voltage
+        ADCS2=0;//internalclock
+        ADCS1=1;//
+        ADCS0=0;//
+        ADFM=1;//left adjustment
+        
+        long int resH,resL,res,display,disp_hi,disp_lo;
+        
+        while(1)
+        {
+                GODONE=1;
+                while(GODONE==1)
+                {}
+                resL=ADRESL;
+                resH=ADRESH;
+                res=(resH<<8)+resL;
+                display=res*50/1023;
+                disp_hi=display/10;
+                disp_lo=display%10;
+                PORTC=(disp_hi<<4)+disp_lo;
+        }
+}

@@ -1,1 +1,93 @@
+#include<pic.h>
+#define _XTAL_FREQ 4000000
+#define RABPU=0
 
+void display(int vote)
+{
+        int hi,lo;
+        hi=vote/10;
+        lo=vote%10;
+        PORTC=(hi<<4)+lo;
+}
+void main()
+{
+        TRISA=0b00111111;
+        TRISB=0b11111111;
+        TRISC=0b00000000;
+        ANSEL=0;
+        ANSELH=0;
+        
+        int AL=0,BNP=0,JP=0,YEN=0;
+        AL=eeprom_read(0);
+        BNP=eeprom_read(1);
+        JP=eeprom_read(2);
+        YEN=eeprom_read(3);
+        display(AL+BNP+JP+YEN);
+        
+        while(1)
+        {
+                if(RB4==0)
+                {
+                        AL=0;
+                        BNP=0;
+                        JP=0;
+                        YEN=0;
+                        display(AL+BNP+JP+YEN);
+                        __delay_ms(1500);
+                }
+
+                {
+                        if(RA5==1)
+                        {
+                                if(RA0==0)
+                                {
+                                        AL++;
+                                        eeprom_write(0,AL);
+                                        display(AL+BNP+JP+YEN);        
+                                        __delay_ms(1500);
+                                }
+
+                             if(RA1==0)
+                                {
+                                        BNP++;
+                                        eeprom_write(1,BNP);
+                                        display(AL+BNP+JP+YEN);        
+                                        __delay_ms(1500);
+                                }
+                                if(RA2==0)
+                                {
+                                        JP++;
+                                        eeprom_write(2,JP);
+                                        display(AL+BNP+JP+YEN);        
+                                        __delay_ms(1500);
+                                }
+                                if(RA4==0)
+                                {
+                                        YEN++;
+                                        eeprom_write(3,YEN);
+                                        display(AL+BNP+JP+YEN);        
+                                        __delay_ms(1500);
+                                }
+                        }
+                        else
+                        {
+                                if(RA0==0)
+                                {
+                                        display(AL);
+                                }
+                                else if(RA1==0)
+                                {
+                                        display(BNP);
+                                }
+                                else if(RA2==0)
+                                {
+                                        display(JP);
+                                }
+                                else if(RA4==0)
+                                {
+                                        display(YEN);
+                                }
+                        }
+                }
+        }
+}

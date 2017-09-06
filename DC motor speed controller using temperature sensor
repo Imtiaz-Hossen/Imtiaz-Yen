@@ -1,0 +1,139 @@
+//IMTIAZ HOSSEN//SH-07
+//UNIVERSITY OF DHAKA//
+//TEMPERATURE CONTROLLED MOTOR//
+#include<pic.h>
+#include<htc.h>
+#define _XTAL_FREQ 4000000
+#define rs RA0                
+#define en RA1
+#define t 2
+void LCD_ini()         //LCD command //
+{
+        en=1;
+        rs=0;//command
+        __delay_ms(t);
+        en=0;
+}
+void LCD_data()      //LCD data sending//
+{
+        rs=1;//send
+        en=1;
+        __delay_ms(t);
+        en=0;
+        rs=0;
+}
+
+
+void main()
+{
+        TRISC=0;                //output//
+        TRISB=0;            //    
+        TRISA=0b000000100;//RA2 input and all other output//
+        ANSELH=0;         // analog ANSELH OFF//
+        ANS2=1;            // analog on pin R2
+        ANS0=0;
+        ANS1=0;
+        ADON=1;          //  A/D convert module on\\
+        CHS3=0;          // analog channel AN2// 
+        CHS2=0;             //  
+        CHS1=1;             // 
+        CHS0=0;              //
+        VCFG=0;         //reference voltage//VDD//
+        ADCS2=1;        // internal clock//
+        ADCS1=1;           //
+        ADCS0=0;            //  
+        ADFM=1;         // right adjUtment
+        
+
+
+        PORTC=0x38;
+        LCD_ini();
+        PORTC=0X0C;     //CURSOR OFF//
+        LCD_ini();
+        while(1)
+        {
+                GODONE=1;       
+                while(GODONE==1)
+        {}
+                int hi_val,lo_val,dig_val;
+                lo_val=ADRESL;
+                hi_val=ADRESH;
+                dig_val=(hi_val<<8)+lo_val;
+                float analog;
+                analog=dig_val*50.0/1023;
+                int hi,value,lo;
+                value=analog*10;
+                if (value<11)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(100);
+                        PORTB=0b00000000;
+                        __delay_ms(100);
+                }
+                else if (value>10&&value<16)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(120);
+                        PORTB=0b00000000;
+                        __delay_ms(80);
+                
+                }
+                else if(value>15&&value<21)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(200);
+                        PORTB=0b00000000;
+                        __delay_ms(60);
+                }
+                        else if(value>20&&value<26)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(250);
+                        PORTB=0b00000000;
+                        __delay_ms(40);
+                }
+                        else if(value>25&&value<31)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(300);
+                        PORTB=0b00000000;
+                        __delay_ms(20);
+                }
+                        else if(value>30&&value<36)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(350);
+                        PORTB=0b00000000;
+                        __delay_ms(10);
+                }
+                        else if(value>35)
+                {
+                        PORTB=0b00010000;
+                        __delay_ms(1000);
+                }
+                
+                hi=value/10;
+                lo=value%10;
+                PORTC=(hi<<4)+lo;
+                {
+                        PORTC=0x80;
+                        LCD_ini();
+                        unsigned char j[]="tempareture";
+                        for(int i=0;i<(sizeof j);i++)
+                        {
+                                PORTC=j[i];
+                                LCD_data();
+                                __delay_ms(1);
+                        }
+                }
+                
+                PORTC=0xC5;
+                LCD_ini();
+                PORTC=(48+hi);
+                LCD_data();
+                PORTC=(48+lo);
+                LCD_data();
+                __delay_ms(2);
+        
+        }
+}
